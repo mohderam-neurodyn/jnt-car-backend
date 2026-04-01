@@ -6,14 +6,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database URL
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql://postgres:password@localhost:5432/jntcar_booking"
-)
+# Database URL from environment variable
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Create engine
-engine = create_engine(DATABASE_URL)
+if not DATABASE_URL:
+    raise ValueError(
+        "DATABASE_URL environment variable is not set. "
+        "Please set it for local development or Render deployment."
+    )
+
+# Create engine with SSL support for Render
+# Render PostgreSQL requires SSL mode
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"sslmode": "require"}
+)
 
 # Create session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

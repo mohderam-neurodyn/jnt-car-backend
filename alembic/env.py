@@ -69,10 +69,16 @@ def run_migrations_online() -> None:
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
     
+    # Add SSL support for Render PostgreSQL
+    connect_args = {}
+    if "render.com" in get_url() or "sslmode=require" in get_url():
+        connect_args["sslmode"] = "require"
+    
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connect_args,
     )
 
     with connectable.connect() as connection:
